@@ -5,6 +5,6 @@ setup(
     packages=find_packages(),
     version='0.1.0',
     description='Final project for jedha bootcamp.  Full Stack Data Scientist',
-    author='Anatole Reffet, Aura Moreno, Malika Berrehail, Palera',
+    author='Anatole Reffet, Aura Moreno, Malika Berrehail, Patricia Escalera',
     license='MIT',
 )

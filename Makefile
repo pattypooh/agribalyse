@@ -79,7 +79,9 @@ test_environment:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
-
+## Basic Preprocessing datasets and save in interim folder 
+preprocess_data: test_environment
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/interim
 
 
 #################################################################################
