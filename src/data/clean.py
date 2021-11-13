@@ -25,3 +25,8 @@ def clean_str_values(data_df:pd.DataFrame)->pd.DataFrame:
             .pipe(clean_duplicates)
             
     return tr_df
+
+def clean_nada():
+    pass
+def hello():
+    print("Hello agriworld")
