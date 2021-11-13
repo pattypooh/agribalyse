@@ -10,6 +10,7 @@ import unidecode
 import utils
 import numpy as np
 
+
 log_fmt = '%(asctime)s - %(module)s - %(funcName)s - %(levelname)s : %(message)s'
 logging.basicConfig(level=logging.INFO, format=log_fmt)
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ def _new_column_name(name, stop_words) ->str:
     logger.debug(f'tokens:{tokens}')
     new_name = '_'.join(tokens)
     return new_name
+
 
 
 def change_column_names(df:pd.DataFrame):

@@ -19,6 +19,7 @@ def clean_duplicates(data_df:pd.DataFrame)->pd.DataFrame:
     tr_df = data_df.pipe(strip_text_columns)
     return tr_df
 
+
 def clean_str_values(data_df:pd.DataFrame)->pd.DataFrame:
     tr_df = data_df.pipe(strip_text_columns) \
             .pipe(clean_duplicates)
