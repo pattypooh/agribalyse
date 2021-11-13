@@ -14,30 +14,26 @@ import numpy as np
 log_fmt = '%(asctime)s - %(module)s - %(funcName)s - %(levelname)s : %(message)s'
 logging.basicConfig(level=logging.INFO, format=log_fmt)
 logger = logging.getLogger(__name__)
-## Configuraiton that can be loaded from a conf file
-def synthese_keep_columns():
-    keep_cols = [i for i in range(27)]
-    return keep_cols
 
-def ingredients_keep_columns():
-    keep_cols = [0, *range(6, 22)]
-    return keep_cols
+## Configuration values for each table.  It could be loaded from a conf file
+dict_params= {'synthese': {'file_name':'Agribalyse_Synthese.csv',
+                            'keep_cols':[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], #columns to keep
+                            'index_key':[0], #table primary key
+                            },
+            'ingredients':{'file_name':'Agribalyse_Detail ingredient.csv',
+                            'keep_cols':[0, 6, 7],#columns to keep
+                            'index_key':[0], #table primary key
+                            'pivot_idx_key':[0], # Column index to use for pivot
+                            'pivot_idx_col':[1], # Position of the column that will be pivoted
+                            'pivot_idx_values':2}, # Position of the column to be used as values for the pivoted column
+            'etapes':{'file_name':'Agribalyse_Detail etape.csv',
+                    'keep_cols':[0, 8, 9, 10, 11, 12, 13],#columns to keep
+                            'index_key':[0], #table primary key
+                            }
+            }
 
-def etapes_keep_columns():
-    keep_cols = [0, *range(6, 102)]
-    return keep_cols
-
-def synthese_key()->int:
-    return 0
-
-def ingredients_key()->int:
-    return 0
-
-def etapes_key()->int:
-    return 0
-
-def merge_keys():
-    return[synthese_key(), ingredients_key(), etapes_key()]
+def get_param(dataset_name:str, param_name:str):
+    return dict_params[dataset_name][param_name]
 
 
 def column_name(df: pd.DataFrame, index_col:int)-> str:
@@ -58,14 +54,10 @@ def _new_column_name(name, stop_words) ->str:
     '''
     split_pattern = r'(\(.*\))' # this pattern matches all characters between parenthesis and the parenthesis 
     tokens = re.sub(split_pattern, '', name).split(' ')
-    logger.debug(f'tokens:{tokens}')
     tokens = [_remove_quotes(unidecode.unidecode(token)).strip() for token in tokens]
     tokens = [token for token in tokens if token not in stop_words]
-    logger.debug(f'tokens:{tokens}')
     new_name = '_'.join(tokens)
     return new_name
-
-
 
 def change_column_names(df:pd.DataFrame):
     '''
@@ -75,6 +67,7 @@ def change_column_names(df:pd.DataFrame):
     ---------
     DataFrame  the current dataframe with new names
     '''
+    logger.debug(f'Formatting column names of dataframe')
     stop_words = ['de', 'aux', 'des', 'et', 'en', 'au' ,'-', 'du']
     current_names = df.columns.tolist()
     new_names = [_new_column_name(name, stop_words) for name in current_names]
@@ -82,61 +75,72 @@ def change_column_names(df:pd.DataFrame):
     return df
 
 def cast_dtype_to_str(data_df:pd.DataFrame, columns)->pd.DataFrame:
+    '''
+    Changes the dtype for columns in a DataFrame
+    Input
+    -------------
+    data_df  The dataframe
+    columns  An int value or a list of ints representing the position of the column to be casted to str
+    A new dataframe with the same size of the input data_df but with dtypes changed.
+    Returns
+    -------------
+    '''
+    logger.debug(f'Casting columns:{columns} to str')
     if type(columns) == list:
         if len(columns) < 1:
-            raise Exception("Sorry, no column names were passed") 
-        dict_dtypes = {col:str for col in columns}
+            raise Exception("Sorry, the list of columns to cast is empty") 
+        cols = data_df.columns[columns].tolist()
+        dict_dtypes = {col:str for col in cols}
     else:
         if type(columns) != str:
             raise Exception("Sorry, the type of the column name must be str")
-        dict_dtypes = {columns:str}
+        col = data_df.columns[columns]
+        dict_dtypes = {col:str}
     
     #dict_dtypes = {col:str for col in columns}
+    logger.debug(f'dict_types:{dict_dtypes}')
     tr_df = data_df.astype(dict_dtypes)
     return tr_df
 
-def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:   
+def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:
+    '''
+    Left Join of 2 dataframes on df1_key and df2_key 
+    Input
+    -------------
+    df1  The left dataframe 
+    df2  The right dataframe
+    df1_key   int of list of ints to be used as join key
+    df2_key   int of list of ints to be used as join key
     
-    if df1[df1_key].dtype != df2[df2_key].dtype:
-        raise TypeError("Different dtypes of keys used to merge") 
+    Returns
+    -------------
+    A merged dataframe 
+    '''
+    logger.debug(f'Merging dataset df1:{df1.shape}, df2:{df2.shape}')
     
-    merged_df = pd.merge(df1, df2, left_on=df1_key, right_on=df2_key, how='inner')
+    key_column1 = df1.columns[df1_key].tolist()
+    key_column2 = df2.columns[df2_key].tolist()
+    logger.debug(f'left_on: {key_column1}, right_on:{key_column2}')
+
+  #  if df1[key_column1].dtypes != df2[key_column2].dtypes:
+  #      raise TypeError("Different dtypes of keys used to merge") 
+    
+    merged_df = pd.merge(df1, df2, left_on=key_column1, right_on=key_column2, how='left')
     return merged_df
 
-def pivot_ingredients(ingred_df, column='Ingredients')->pd.DataFrame:
-    '''
-    Pivot dataframe of ingredients to convert each ingredient into colum :using get_dummies
-    '''
-    #ingred_pivot = pd.get_dummies(ingred_df, columns=[column])
-    ingred_pivot = pd.pivot(ingred_df, index=[], columns=[], values=[]).rename_axis(None)
-    return ingred_pivot
+def pivot_ingredients(data_df):
+    dataframe_name = 'ingredients'
+    index_column = data_df.columns[get_param(dataframe_name,'pivot_idx_key')].tolist()
+    pivot_column = data_df.columns[get_param(dataframe_name,'pivot_idx_col')]
+    value_column = data_df.columns[get_param(dataframe_name,'pivot_idx_values')]
 
-def merge_datasets(synthese_df, ingred_df, etapes_df, df1_key, df2_key, df3_key, d2_keep, d3_keep)->pd.DataFrame:
+    ing_pivot_df = pd.pivot(data=data_df, index=index_column, columns=pivot_column, values = value_column)\
+        .reset_index().rename_axis(None, axis=1)
+    return ing_pivot_df
+
+def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_key, format_column_names=True):
     '''
-    Creates 2 merged data sets. The 1st one is the synthese vs ingredients and the 2nd one is
-    synthse vs etapes.  
-    '''
-    #transform all keys to strings (or ints)
-    logger.info('Starting merging datasets')
-
-    syn_df= cast_dtype_to_str(synthese_df, df1_key)
-    ing_df= cast_dtype_to_str(ingred_df, df2_key).iloc[:,d2_keep]
-    logger.info(f'{ingred_df.shape}')
-    eta_df= cast_dtype_to_str(etapes_df, df3_key).iloc[:, d3_keep]
-    print(df1_key, df2_key, df3_key)
-
-    # first pivot ingredients dataframe
-    ing_df = pivot_ingredients(ing_df, 'Ingredients')
-    
-    merged_syn_ingred_df = merge_dataset(syn_df, ing_df, df1_key, df2_key)
-    merged_syn_etape_df = merge_dataset(syn_df, eta_df, df1_key, df3_key)
-
-    return merged_syn_ingred_df, merged_syn_etape_df
-
-def preprocess_dataset(file_name: str, input_filepath, output_filepath):
-    '''
-    Reads a file, then standardize the column names, clean spaces in categorical data, remove duplicates and 
-    saves a new cleaned file
+    Reads a file, then changes the column names by removing spaces and removing some text that is between "( )"
     Parameters:
     ----------------------
     file_name: 
@@ -147,15 +151,17 @@ def preprocess_dataset(file_name: str, input_filepath, output_filepath):
         The path where the new file is saved, with the same name than file_name
 
     '''
+    logger.debug(f'Input parameters:{file_name}, {input_filepath}, {output_filepath}, {index_key}, {format_column_names}')
     logger.info(f'Preprocessing dataset {input_filepath}/{file_name}')
 
     data_df = utils.load_dataset(input_filepath, file_name)
-    data_df = change_column_names(data_df)
-    #TODO move this cleaning to make_dataset
-    # data_df = clean_str_values(data_df)
-    #data_df.to_csv(os.path.join(output_filepath,file_name), index=False )
-        
-    logger.debug(f'Dataset preprocessed and saved at {output_filepath}/{file_name}')
+    if format_column_names:
+        data_df = change_column_names(data_df)
+
+    #Change the primary key to type 'str' (because later it will be used for merge and the tables primary keys must have the same type)
+    key = data_df.columns[index_key].to_list()
+    data_df = cast_dtype_to_str(data_df, index_key)
+    logger.debug(f'Dataset preprocessed from {output_filepath}/{file_name}')
     return data_df
 
 
@@ -166,25 +172,34 @@ def main(input_filepath, output_filepath):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
+    logger.info('Preprocessing datasets from raw data')    
 
-    logger.info('Making final data set from raw data')    
-    # Retrieve all files in from raw data folder and make basic cleaning
-    files = ['Agribalyse_Synthese.csv', 'Agribalyse_Detail ingredient.csv', 'Agribalyse_Detail etape.csv']
-    dfs = list()
-    for file_name in files:
-        df = preprocess_dataset(file_name, input_filepath, output_filepath)
-        dfs.append(df)
-    # Check that the files were created in the output_filpath
-    #TODO
-    # retrieve columns to be used for merge
-    merge_columns = [column_name(df, merge_keys()[i]) for i,df in enumerate(dfs)]
-    new_ingred_df, new_etape_df = merge_datasets(*dfs, *merge_columns, \
-                                d2_keep=ingredients_keep_columns(), d3_keep=etapes_keep_columns())
+    # 1. Retrieve all files from /data/raw folder and make basic cleaning and merge
+    #files = ['Agribalyse_Synthese.csv', 'Agribalyse_Detail ingredient.csv', 'Agribalyse_Detail etape.csv']
+    dfs = dict()
+    for dataset_name in dict_params.keys():# For every dataset
+        file_name = get_param(dataset_name,'file_name')
+        keep_columns = get_param(dataset_name, 'keep_cols')
+        key = get_param(dataset_name, 'index_key')
+        dfs[dataset_name]=preprocess_dataset(file_name, input_filepath, output_filepath, key).iloc[:, keep_columns]
+     
+    #2. pivot ingredients dataframe
+    ing_df = dfs['ingredients']
+        
+    dfs['ingredients'] = pivot_ingredients(ing_df)
+  
+    #3. merge synthese vs ingredients
+    synthese_key = get_param('synthese', 'index_key')
+    ingredients_key = get_param('ingredients', 'index_key')
+    etapes_key = get_param('etapes', 'index_key')
+    #3. merge synthese vs ingredients and synthse vs etapes    
+    new_ingred_df = merge_dataset(dfs['synthese'], dfs['ingredients'], synthese_key,ingredients_key)
+    new_etape_df = merge_dataset(dfs['synthese'], dfs['etapes'], synthese_key, etapes_key)
+    #4. Save the new datasets
+    new_ingred_df.to_csv(os.path.join(output_filepath, get_param('ingredients','file_name')), index=False)
+    new_etape_df.to_csv(os.path.join(output_filepath, get_param('etapes','file_name')), index=False)
 
-    new_ingred_df.to_csv(os.path.join(output_filepath, files[1]))
-    new_etape_df.to_csv(os.path.join(output_filepath, files[2]))
-
-
+    logger.info(f'End preprocessing. 2 files were created {get_param("ingredients","file_name")},{get_param("etapes","file_name")} in {output_filepath}')
 
 if __name__ == '__main__':
     #log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
