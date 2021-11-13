@@ -7,14 +7,18 @@ import os
 from dotenv import find_dotenv, load_dotenv
 import preprocessing
 
-def load_dataset(input_filepath:str, file_name):
-    #file_name = 'Agribalyse_Synthese.csv'
-    data_df = pd.read_csv(os.path.join(input_filepath,file_name))
-    return data_df
+def synthese_keep_columns():
+    keep_cols = [i for i in range(27)]
+    return keep_cols
 
-def basic_clean(data_df:pd.DataFrame):
-    tr_df = data_df.pipe(preprocessing.strip_text_columns)
-    return tr_df
+def ingredients_keep_columns():
+    keep_cols = [0, *range(6, 22)]
+    return keep_cols
+
+def etapes_keep_columns():
+    keep_cols = [0, *range(6, 102)]
+    return keep_cols
+
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
@@ -24,12 +28,14 @@ def main(input_filepath, output_filepath):
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
-    file_name = 'Agribalyse_Synthese.csv'
-    synthese_df = load_dataset(input_filepath, file_name)
-    synthese_df = basic_clean(synthese_df)
-    synthese_df.to_csv(os.path.join(output_filepath,file_name))
+    logger.info('Making final data set from raw data')
     
+    # Retrieve all files in from raw data folder and make basic cleaning
+    agribalise_df = pd.read_csv(os.path.join(input_filepath,'Agribalyse.csv'))
+    
+    logging.info(f'Data set ready for training')
+
+
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)
