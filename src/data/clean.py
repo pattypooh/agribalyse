@@ -28,3 +28,5 @@ def clean_str_values(data_df:pd.DataFrame)->pd.DataFrame:
 
 def clean_nada():
     pass
+def hello():
+    print("Hello agriworld")
