@@ -7,7 +7,6 @@ import os
 from dotenv import find_dotenv, load_dotenv
 import re
 import unidecode
-import utils
 import numpy as np
 
 
@@ -138,6 +137,11 @@ def pivot_ingredients(data_df):
         .reset_index().rename_axis(None, axis=1)
     return ing_pivot_df
 
+def load_dataset(input_filepath:str, file_name):
+    #file_name = 'Agribalyse_Synthese.csv'
+    data_df = pd.read_csv(os.path.join(input_filepath,file_name))
+    return data_df
+
 def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_key, format_column_names=True):
     '''
     Reads a file, then changes the column names by removing spaces and removing some text that is between "( )"
@@ -149,17 +153,25 @@ def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_ke
         The path where the file_name can be found
     output_filepath: 
         The path where the new file is saved, with the same name than file_name
-
+    index_key An int or list of ints representing the primary key of the dataset
+    format_column_names  If True, then the column names will change to have  more readable and short column names
+                        If False, the names will be kept as the original dataset
     '''
     logger.debug(f'Input parameters:{file_name}, {input_filepath}, {output_filepath}, {index_key}, {format_column_names}')
     logger.info(f'Preprocessing dataset {input_filepath}/{file_name}')
 
-    data_df = utils.load_dataset(input_filepath, file_name)
+    data_df = load_dataset(input_filepath, file_name)
     if format_column_names:
         data_df = change_column_names(data_df)
 
     #Change the primary key to type 'str' (because later it will be used for merge and the tables primary keys must have the same type)
-    key = data_df.columns[index_key].to_list()
+    if type(index_key) is int:
+        key = index_key
+    elif type(index_key) is list:
+        key = data_df.columns[index_key].to_list()
+    else:
+        raise TypeError('The index_key type should be an integer number of a list of integer numbers')
+        
     data_df = cast_dtype_to_str(data_df, index_key)
     logger.debug(f'Dataset preprocessed from {output_filepath}/{file_name}')
     return data_df
@@ -194,7 +206,9 @@ def main(input_filepath, output_filepath):
     etapes_key = get_param('etapes', 'index_key')
     #3. merge synthese vs ingredients and synthse vs etapes    
     new_ingred_df = merge_dataset(dfs['synthese'], dfs['ingredients'], synthese_key,ingredients_key)
+    new_ingred_df = change_column_names(new_ingred_df)
     new_etape_df = merge_dataset(dfs['synthese'], dfs['etapes'], synthese_key, etapes_key)
+    new_etape_df = change_column_names(new_etape_df)
     #4. Save the new datasets
     new_ingred_df.to_csv(os.path.join(output_filepath, get_param('ingredients','file_name')), index=False)
     new_etape_df.to_csv(os.path.join(output_filepath, get_param('etapes','file_name')), index=False)

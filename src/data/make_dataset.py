@@ -7,18 +7,33 @@ import os
 from dotenv import find_dotenv, load_dotenv
 import preprocessing
 
-def synthese_keep_columns():
-    keep_cols = [i for i in range(27)]
-    return keep_cols
 
-def ingredients_keep_columns():
-    keep_cols = [0, *range(6, 22)]
-    return keep_cols
 
-def etapes_keep_columns():
-    keep_cols = [0, *range(6, 102)]
-    return keep_cols
+def clean_trailing_spaces(df:pd.DataFrame)->pd.DataFrame:
+    '''
+    Retrieves columns of type ''object'' (string) and strips trailing spaces in their values
+    '''
+    index_obj_cols = df.select_dtypes(include='object').columns
+    for col in index_obj_cols:
+        df[col] = df[col].str.strip()
+    return df
 
+def clean_missing(df: pd.DataFrame):
+    pass
+
+def clean_duplicates(data_df:pd.DataFrame)->pd.DataFrame:
+    tr_df = data_df.pipe(clean_trailing_spaces)
+    return tr_df
+
+def clean_products(data_df:pd.DataFrame)->pd.DataFrame:
+    pass
+
+def clean_all(data_df:pd.DataFrame)->pd.DataFrame:
+    tr_df = data_df.pipe(clean_trailing_spaces) \
+            .pipe(clean_duplicates)\
+                .pipe(clean_products)
+            
+    return tr_df
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
@@ -30,9 +45,12 @@ def main(input_filepath, output_filepath):
     
     logger = logging.getLogger(__name__)
     logger.info('Making final data set from raw data')
-    
+    file_name = ['Agribalise_Detail ingredient.csv']
+
     # Retrieve all files in from raw data folder and make basic cleaning
-    agribalise_df = pd.read_csv(os.path.join(input_filepath,'Agribalyse.csv'))
+    data_df = pd.read_csv(os.path.join(input_filepath,file_name))
+    data_df = clean_all(data_df)
+
     
     logging.info(f'Data set ready for training')
 
