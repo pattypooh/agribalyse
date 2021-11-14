@@ -20,11 +20,11 @@ dict_params= {'synthese': {'file_name':'Agribalyse_Synthese.csv',
                             'index_key':[0], #table primary key
                             },
             'ingredients':{'file_name':'Agribalyse_Detail ingredient.csv',
-                            'keep_cols':[0, 6, 7],#columns to keep
+                            'keep_cols':[0, 2, 3, 4, 5, 6, 7],#columns to keep
                             'index_key':[0], #table primary key
-                            'pivot_idx_key':[0], # Column index to use for pivot
-                            'pivot_idx_col':[1], # Position of the column that will be pivoted
-                            'pivot_idx_values':2}, # Position of the column to be used as values for the pivoted column
+                            'pivot_idx_key':[0,1, 2, 3, 4], # Column index to use for pivot
+                            'pivot_idx_col':5, # Position of the column that will be pivoted
+                            'pivot_idx_values':6}, # Position of the column to be used as values for the pivoted column
             'etapes':{'file_name':'Agribalyse_Detail etape.csv',
                     'keep_cols':[0, 8, 9, 10, 11, 12, 13],#columns to keep
                             'index_key':[0], #table primary key
@@ -79,20 +79,21 @@ def cast_dtype_to_str(data_df:pd.DataFrame, columns)->pd.DataFrame:
     Input
     -------------
     data_df  The dataframe
-    columns  An int value or a list of ints representing the position of the column to be casted to str
+    columns  The column label or list of column labels representing to be casted to str
     A new dataframe with the same size of the input data_df but with dtypes changed.
     Returns
     -------------
     '''
     logger.debug(f'Casting columns:{columns} to str')
+    logger.debug(f'type of input columns: {type(columns)}')
     if type(columns) == list:
         if len(columns) < 1:
             raise Exception("Sorry, the list of columns to cast is empty") 
         cols = data_df.columns[columns].tolist()
         dict_dtypes = {col:str for col in cols}
     else:
-        if type(columns) != str:
-            raise Exception("Sorry, the type of the column name must be str")
+        if type(columns) != int:
+            raise Exception("Sorry, the type of the column name must be the position in the dataframe")
         col = data_df.columns[columns]
         dict_dtypes = {col:str}
     
@@ -135,6 +136,12 @@ def pivot_ingredients(data_df):
 
     ing_pivot_df = pd.pivot(data=data_df, index=index_column, columns=pivot_column, values = value_column)\
         .reset_index().rename_axis(None, axis=1)
+    ing_pivot_df.fillna(0, inplace=True)
+    num_columns = ing_pivot_df.select_dtypes(include=np.number).columns
+    for c in num_columns:
+        index_ones = ing_pivot_df[c] > 0
+        ing_pivot_df.loc[index_ones, c] = 1
+
     return ing_pivot_df
 
 def load_dataset(input_filepath:str, file_name):
@@ -204,11 +211,13 @@ def main(input_filepath, output_filepath):
     synthese_key = get_param('synthese', 'index_key')
     ingredients_key = get_param('ingredients', 'index_key')
     etapes_key = get_param('etapes', 'index_key')
+
     #3. merge synthese vs ingredients and synthse vs etapes    
     new_ingred_df = merge_dataset(dfs['synthese'], dfs['ingredients'], synthese_key,ingredients_key)
-    new_ingred_df = change_column_names(new_ingred_df)
     new_etape_df = merge_dataset(dfs['synthese'], dfs['etapes'], synthese_key, etapes_key)
-    new_etape_df = change_column_names(new_etape_df)
+
+    new_ingred_df.fillna(0, inplace=True)
+    new_etape_df.fillna(0, inplace=True)
     #4. Save the new datasets
     new_ingred_df.to_csv(os.path.join(output_filepath, get_param('ingredients','file_name')), index=False)
     new_etape_df.to_csv(os.path.join(output_filepath, get_param('etapes','file_name')), index=False)
