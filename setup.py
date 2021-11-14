@@ -8,3 +8,4 @@ setup(
     author='Anatole Reffet, Aura Moreno, Malika Berrehail, Patricia Escalera',
     license='MIT',
 )
+print('in setup.py')
