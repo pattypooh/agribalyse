@@ -22,7 +22,7 @@ dict_params= {'synthese': {'file_name':'Agribalyse_Synthese.csv',
             'ingredients':{'file_name':'Agribalyse_Detail ingredient.csv',
                             'keep_cols':[0, 2, 3, 4, 5, 6, 7],#columns to keep
                             'index_key':[0], #table primary key
-                            'pivot_idx_key':[0,1, 2, 3, 4], # Column index to use for pivot
+                            'pivot_idx_key':[0, 1, 2, 3, 4], # Column index to use for pivot
                             'pivot_idx_col':5, # Position of the column that will be pivoted
                             'pivot_idx_values':6}, # Position of the column to be used as values for the pivoted column
             'etapes':{'file_name':'Agribalyse_Detail etape.csv',
@@ -125,7 +125,8 @@ def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:
   #  if df1[key_column1].dtypes != df2[key_column2].dtypes:
   #      raise TypeError("Different dtypes of keys used to merge") 
     
-    merged_df = pd.merge(df1, df2, left_on=key_column1, right_on=key_column2, how='left')
+    merged_df = pd.merge(df1, df2, left_on=key_column1, right_on=key_column2, how='left', suffixes=(None,"_y"))
+    merged_df.drop(labels=key_column2, axis=1, inplace=True)
     return merged_df
 
 def pivot_ingredients(data_df):
@@ -141,7 +142,8 @@ def pivot_ingredients(data_df):
     for c in num_columns:
         index_ones = ing_pivot_df[c] > 0
         ing_pivot_df.loc[index_ones, c] = 1
-
+    drop_labels = index_column[1:]
+    ing_pivot_df.drop(labels=drop_labels, axis=1, inplace=True)
     return ing_pivot_df
 
 def load_dataset(input_filepath:str, file_name):
@@ -204,7 +206,6 @@ def main(input_filepath, output_filepath):
      
     #2. pivot ingredients dataframe
     ing_df = dfs['ingredients']
-        
     dfs['ingredients'] = pivot_ingredients(ing_df)
   
     #3. merge synthese vs ingredients
@@ -213,6 +214,7 @@ def main(input_filepath, output_filepath):
     etapes_key = get_param('etapes', 'index_key')
 
     #3. merge synthese vs ingredients and synthse vs etapes    
+    keep_synthese_merge = []
     new_ingred_df = merge_dataset(dfs['synthese'], dfs['ingredients'], synthese_key,ingredients_key)
     new_etape_df = merge_dataset(dfs['synthese'], dfs['etapes'], synthese_key, etapes_key)
 
