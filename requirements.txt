@@ -25,5 +25,7 @@ dash
 dash_html_components
 dash_core_components
 dash.dependencies
+dash_bootstrap_components
 plotly.express
-
+streamlit
+streamlit-pages
