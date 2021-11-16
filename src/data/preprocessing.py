@@ -24,7 +24,9 @@ dict_params= {'synthese': {'file_name':'Agribalyse_Synthese.csv',
                             'index_key':[0], #table primary key
                             'pivot_idx_key':[0, 1, 2, 3, 4], # Column index to use for pivot
                             'pivot_idx_col':5, # Position of the column that will be pivoted
-                            'pivot_idx_values':6}, # Position of the column to be used as values for the pivoted column
+                            'pivot_idx_values':6,# Position of the column to be used as values for the pivoted column
+                            'pivot_keep_cols':[0, 2, 3, 4, 5, 6, 7],}, 
+
             'etapes':{'file_name':'Agribalyse_Detail etape.csv',
                     'keep_cols':[0, 8, 9, 10, 11, 12, 13],#columns to keep
                             'index_key':[0], #table primary key
