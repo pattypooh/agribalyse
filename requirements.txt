@@ -29,3 +29,8 @@ dash_bootstrap_components
 plotly.express
 streamlit
 streamlit-pages
+=======
+unidecode
+mlflow
+json
+>>>>>>> b3cbfaccb5ee73b883771cf73dadcd6604c62ad3
