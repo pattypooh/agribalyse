@@ -51,10 +51,11 @@ def main():
         st.write("")
 
         st.subheader("L'impact de votre assiette sur le changement climatique (kg CO2 eq/kg de produit)")
-        st.write("**14 indicateurs permettent de mesurer l'impacte de notre consommation sur l'empreinte carbonne.**")
-        st.write("Quelle sera ton impacte .....")
+        st.write("**14 indicateurs permettent de mesurer l'impact de notre consommation sur l'empreinte carbonne.**")
+        st.write("Quelle sera ton impact .....")
         data = dataset[["Nom Français","Ingredients","Score unique EF (mPt/kg de produit)"]]
-        selection = data['Nom Français'].drop_duplicates()
+        selection = data['Nom Français'].drop_duplicates()  
+        
 
         DEFAULT = ' -Click Me  ...   👈'
         def selectbox_with_default(text, values, default=DEFAULT, sidebar=False):
@@ -70,16 +71,17 @@ def main():
         ingredient = data[data['Nom Français'].isin([make_selection])]
         st.write("le score de ton plat est de : ")
         total = round(ingredient["Score unique EF (mPt/kg de produit)"].sum(),2)
+        st.write("La liste des ingrédients : ")
         ingredient = ingredient[['Ingredients', 'Score unique EF (mPt/kg de produit)']]
         st.write({f"le score de ton plat est de {total} mPt par kg de produit"})
         st.write(ingredient)
         st.subheader('') 
-        st.write("**Pourcentage des ingrédients dans le score environnemental**")
+        #st.write("**Pourcentage des ingrédients dans le score environnemental**")
         fig = px.pie(ingredient, values='Score unique EF (mPt/kg de produit)', names='Ingredients')
         st.plotly_chart(fig)
         
-        #menu déroulant Ingredient selection multiple
-        st.write("**Choisit tes ingrédients et calculons le score de ... : **")
+
+        st.write("**Choisit tes ingrédients et calculons le score : **")
         multiselection = data['Ingredients'].drop_duplicates()
           # supression de l'ingredient Autres étapes
         multiselection = multiselection.drop([4])
@@ -89,7 +91,7 @@ def main():
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Ingrédients choisit ... :", options)
      
-   
+        
     
     else:
         st.subheader('About')#
@@ -97,3 +99,4 @@ def main():
 
 if __name__ == '__main__':
     main()    
+
