@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np 
 
 
-df = pd.read_csv("~/Desktop/Jedha_Formation/Projets/agribalyse/src/app/liste/liste_ingredient.csv")
+df = pd.read_csv("../../data/raw/liste_ingredient.csv")
 
 
 #Creating two lists that we can use throughout our requesting
