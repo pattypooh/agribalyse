@@ -29,3 +29,4 @@ plotly.express
 unidecode
 mlflow
 json
+pyyaml
