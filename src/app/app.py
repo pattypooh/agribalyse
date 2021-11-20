@@ -3,6 +3,8 @@ import pandas as pd
 #import matplotlib.pyplot as plt
 import plotly.express as px
 import numpy as np
+#We import the necessary function to an active ingredient filter
+from predict import ingredient_to_dataframe
 
 header_container = st.container()
 
