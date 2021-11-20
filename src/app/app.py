@@ -8,7 +8,6 @@ from predict import ingredient_to_dataframe
 
 header_container = st.container()
 
-# pic_Agribalyse
 
 #dataset = pd.read_csv("Agribalyse_Detail ingredient.csv")
 dataset = pd.read_csv('../../data/raw/Agribalyse_Detail ingredient.csv')
