@@ -32,5 +32,5 @@ streamlit-pages
 unidecode
 mlflow
 json
+pyyaml
 streamlit
-import plotly.express
