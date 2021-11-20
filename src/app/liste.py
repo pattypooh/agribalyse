@@ -13,7 +13,7 @@ valeurs_ingredients = [int(valeurs_ingredients) for valeurs_ingredients in valeu
 #Writng out the function 
 def liste(x):
     y = liste_ingredients.index(x)
-    while y <= liste_ingredients.index('Œuf de poule'):
+    while y <= liste_ingredients.index('Œuf de poule'): #Oeuf de poule is the last item in the list 
         if x == liste_ingredients[y]:
             valeurs_ingredients[y] = 1
             break
