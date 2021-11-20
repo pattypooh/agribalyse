@@ -92,7 +92,7 @@ def main():
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Ingrédients choisit ... :", options)
-            st.write("Résultat", ingredient_to_dataframe(options))
+            st.write("Résultat", ingredient_to_dataframe(multiselection,options))
      
         
     
@@ -103,3 +103,6 @@ def main():
 if __name__ == '__main__':
     main()    
 
+#options = pd.DataFrame(options, columns="Ingredients")
+            #if options["Ingredients"] == ingredient_to_dataframe['Ingredients']:
+                #ingredient_to_dataframe["Presence"] = 1
