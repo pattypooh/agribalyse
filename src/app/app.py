@@ -92,6 +92,7 @@ def main():
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Ingrédients choisit ... :", options)
+            st.write("Résultat", ingredient_to_dataframe(options))
      
         
     

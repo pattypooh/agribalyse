@@ -1,5 +1,5 @@
 
-from src.models import predict_model
+#from src.models import predict_model
 import pandas as pd
 import numpy as np
 
@@ -18,11 +18,11 @@ def ingredient_to_dataframe(ingredients):
 
     return final_dataframe
 
-def predict_score(ingredients_user):
-    score = 1
-    df_213_ing = ingredient_to_dataframe()
-    
-    score = predict_model(df_213_ing)
-    
-    return score
+#def predict_score(ingredients_user):
+#    score = 1
+#    df_213_ing = ingredient_to_dataframe()
+#    
+#    score = predict_model(df_213_ing)
+#    
+#    return score
 
