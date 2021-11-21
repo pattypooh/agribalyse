@@ -20,7 +20,7 @@ ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascendin
 #    st.title("Agribalyse")   
 
 def main():    
-    menu = ['A propos','Home', 'About']
+    menu = ['A propos de nous','Home', 'About us']
     #choice = st.sidebar.selectbox("Menu", menu)
     choice = st.sidebar.radio('Select a page:',menu)
     if choice == 'A propos':

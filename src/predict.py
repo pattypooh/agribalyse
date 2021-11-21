@@ -18,8 +18,8 @@ def ingredient_to_dataframe(liste_ingredients, ingredient_for_recipe):
     return initial_dataframe
 
 def predict_score(ingredients_user):
-    score = 55
-    #df_213_ing = ingredient_to_dataframe(ingredients_user)
-    #score = predict_model.test(df_213_ing)
+    score = 30
+    df_213_ing = ingredient_to_dataframe(liste_ingredients, ingredients_user)
+    score = predict_model.predict(df_213_ing)
     return score
 
