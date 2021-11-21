@@ -5,25 +5,24 @@ import plotly.express as px
 import numpy as np
 #We import the necessary function to an active ingredient filter
 from predict import ingredient_to_dataframe
+import os
+import predict
 
-header_container = st.container()
+#header_container = st.container()
 
 
 #dataset = pd.read_csv("Agribalyse_Detail ingredient.csv")
-dataset = pd.read_csv('../../data/raw/Agribalyse_Detail ingredient.csv')
+print(os.curdir)
+dataset = pd.read_csv('./../data/raw/Agribalyse_Detail ingredient.csv')
+ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascending=True)
+#product_list = 
+#with header_container:
+#    st.title("Agribalyse")   
 
-
-with header_container:
-    st.title("Agribalyse")
-    
-
-
-def main():
-        
-    
+def main():    
     menu = ['A propos','Home', 'About']
-    choice = st.sidebar.selectbox("Menu", menu)
-    
+    #choice = st.sidebar.selectbox("Menu", menu)
+    choice = st.sidebar.radio('Select a page:',menu)
     if choice == 'A propos':
         
         st.write("Depuis 2013, AGRIBALYSE® est un programme collectif et innovant qui met à disposition des données de référence sur les impacts environnementaux des produits agricoles et alimentaires à travers une base de données construite selon la méthodologie des Analyses du Cycle de Vie (ACV).")
@@ -54,6 +53,7 @@ def main():
         st.subheader("L'impact de votre assiette sur le changement climatique (kg CO2 eq/kg de produit)")
         st.write("**14 indicateurs permettent de mesurer l'impact de notre consommation sur l'empreinte carbonne.**")
         st.write("Quelle sera ton impact .....")
+        ###Corriger. Il faut selectionner le score total (de la table synthese) 
         data = dataset[["Nom Français","Ingredients","Score unique EF (mPt/kg de produit)"]]
         selection = data['Nom Français'].drop_duplicates()  
         
@@ -83,7 +83,7 @@ def main():
         
 
         st.write("**Choisit tes ingrédients et calculons le score : **")
-        multiselection = data['Ingredients'].drop_duplicates()
+        multiselection = ingredients_list
           # supression de l'ingredient Autres étapes
         multiselection = multiselection.drop([4])
         options = st.multiselect('------', multiselection)
@@ -91,10 +91,10 @@ def main():
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Ingrédients choisit ... :", options)
-            st.write("Résultat", ingredient_to_dataframe(multiselection,options))
+            #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
+            score = st.write("Résultat", predict.predict_score(multiselection))
+            st.write(score)
      
-        
-    
     else:
         st.subheader('About')#
     

@@ -4,7 +4,6 @@ import numpy as np
 
 df = pd.read_csv("../../data/raw/liste_ingredient.csv")
 
-
 #Creating two lists that we can use throughout our requesting
 liste_ingredients = df.columns.tolist()
 valeurs_ingredients = df.values.tolist()

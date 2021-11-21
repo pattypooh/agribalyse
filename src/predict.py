@@ -1,11 +1,7 @@
 
-#from src.models import predict_model
-
-
-
-
 import pandas as pd
 import numpy as np
+from src.models import predict_model
 
 df = pd.read_csv("liste_ingredient.csv")
 
@@ -21,11 +17,9 @@ def ingredient_to_dataframe(liste_ingredients, ingredient_for_recipe):
 
     return initial_dataframe
 
-#def predict_score(ingredients_user):
-    # score = 1
-    # df_213_ing = ingredient_to_dataframe(ingredients_user)
-    
-    # score = predict_model.test(df_213_ing)
-   
-    # return score
+def predict_score(ingredients_user):
+    score = 55
+    #df_213_ing = ingredient_to_dataframe(ingredients_user)
+    #score = predict_model.test(df_213_ing)
+    return score
 
