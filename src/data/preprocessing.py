@@ -88,7 +88,7 @@ def cast_dtype_to_str(data_df:pd.DataFrame, columns)->pd.DataFrame:
     Returns
     -------------
     '''
-    logger.debug(f'Casting columns:{columns} to str')
+    logger.debug(f'Start casting columns:{columns} to str')
     #logger.debug(f'type of input columns: {type(columns)}')
     if type(columns) == list:
         if len(columns) < 1:
@@ -102,8 +102,8 @@ def cast_dtype_to_str(data_df:pd.DataFrame, columns)->pd.DataFrame:
         dict_dtypes = {col:str}
     
     #dict_dtypes = {col:str for col in columns}
-    logger.debug(f'dict_types:{dict_dtypes}')
     tr_df = data_df.astype(dict_dtypes)
+    logger.debug(f'dict_types:{dict_dtypes}')
     return tr_df
 
 def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:
@@ -120,11 +120,10 @@ def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:
     -------------
     A merged dataframe 
     '''
-    logger.debug(f'Merging dataset df1:{df1.shape}, df2:{df2.shape}')
-    
+    logger.debug('Start merging')
     key_column1 = df1.columns[df1_key].tolist()
     key_column2 = df2.columns[df2_key].tolist()
-    logger.debug(f'left_on: {key_column1}, right_on:{key_column2}')
+    logger.debug(f'df1:{df1.shape}, df2:{df2.shape}. Keys columns: {key_column1}, {key_column2}')
 
   #  if df1[key_column1].dtypes != df2[key_column2].dtypes:
   #      raise TypeError("Different dtypes of keys used to merge") 
@@ -133,14 +132,54 @@ def merge_dataset(df1, df2, df1_key, df2_key)->pd.DataFrame:
     merged_df.drop(labels=key_column2, axis=1, inplace=True)
     return merged_df
 
-def pivot_ingredients(data_df, make_one_hot=True):
-    dataframe_name = 'ingredients'
-    index_column = data_df.columns[get_param(dataframe_name,'pivot_idx_key')].tolist()
-    pivot_column = data_df.columns[get_param(dataframe_name,'pivot_idx_col')]
-    value_column = data_df.columns[get_param(dataframe_name,'pivot_idx_values')]
+def _create_sparse_ingredients(ing_df, key_columns
+                             ,pivot_column, value_columns)->pd.DataFrame:
+    #1st, replace values of Score_unique_EF with 1 
+    subset_ingred = ing_df.loc[:,['Ciqual_AGB', 'Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name' , 'Ingredients', 'Score_unique_EF_']]
+    subset_ingred.loc[subset_ingred['Score_unique_EF_'] > 0, 'Score_unique_EF_'] = 1
+    drop_cols = ['Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name'] 
+    subset_ingred = subset_ingred.fillna(0)
+    subset_ingred['Score_unique_EF_'] = subset_ingred['Score_unique_EF_'].astype(np.int16)
+    # pivot the dataframe to have ingredients in columns axis
+    pivot_subset_ingred = pd.pivot(subset_ingred, index=['Ciqual_AGB', 'Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name'], \
+                               columns='Ingredients', values='Score_unique_EF_').reset_index()
+    pivot_subset_ingred = pivot_subset_ingred.rename_axis(None, axis=1)
+    numeric_cols = pivot_subset_ingred.select_dtypes(include=np.number).columns
+    pivot_subset_ingred = pivot_subset_ingred.fillna(0)
+    pivot_subset_ingred[numeric_cols] = pivot_subset_ingred[numeric_cols].astype(int)
+    pivot_subset_ingred=pivot_subset_ingred.drop(columns=drop_cols)
+    return pivot_subset_ingred
 
-    ing_pivot_df = pd.pivot(data=data_df, index=index_column, columns=pivot_column, values = value_column)\
-        .reset_index().rename_axis(None, axis=1)
+def _create_features_min_max_ing(ing_df, key_columns, pivot_column, value_columns)->pd.DataFrame:
+    
+    pivot_index = ['Ciqual_AGB', 'Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name']
+    pivot_columns = ['Ingredients']
+    pivot_values = ['min_EF', 'max_EF']
+    drop_cols = ['Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name'] 
+
+    pivot_ing_minmax = pd.pivot(data=ing_df, index=pivot_index, columns=pivot_columns, values=pivot_values,).reset_index()
+    new_col_index = [f'{multiindex[0]}_{multiindex[1]}' if multiindex[1]!='' else multiindex[0] for multiindex in pivot_ing_minmax.columns]
+    pivot_ing_minmax.columns=new_col_index
+    pivot_ing_minmax = pivot_ing_minmax.fillna(0)
+    pivot_ing_minmax = pivot_ing_minmax.drop(columns=drop_cols)
+    return pivot_ing_minmax
+
+    #pd.concat([ing_pivot_df, subset_ingred], axis=1, join='inner')
+
+def pivot_ingredients(data_df, make_one_hot=True, add_features=True):
+    pivot_index = ['Ciqual_AGB', 'Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name']
+    pivot_columns = ['Ingredients']
+    pivot_values = ['Score_unique_EF_','min_EF', 'max_EF']
+    
+    #ing_pivot_df = pd.pivot(data=data_df, index=pivot_index, columns=pivot_columns)\
+    #    .reset_index().rename_axis(None, axis=1)
+
+    ing_pivot_df = pd.pivot(data=data_df, index=pivot_index, columns=pivot_columns, values=pivot_values,).reset_index()
+    #Create new index column names
+    new_col_index = [f'{multiindex[0]}_{multiindex[1]}' if multiindex[1]!='' else multiindex[0] for multiindex in ing_pivot_df.columns]
+    new_col_index
+    ing_pivot_df.columns=new_col_index    
+   
     ing_pivot_df.fillna(0, inplace=True)
     num_columns = ing_pivot_df.select_dtypes(include=np.number).columns
     if make_one_hot: #If values should be only 0 and 1
@@ -148,7 +187,7 @@ def pivot_ingredients(data_df, make_one_hot=True):
             index_ones = ing_pivot_df[c] > 0
             ing_pivot_df.loc[index_ones, c] = 1
 
-    drop_labels = index_column[1:]
+    drop_labels = ['Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name']#index_column[1:]
     ing_pivot_df.drop(labels=drop_labels, axis=1, inplace=True)
     return ing_pivot_df
 
@@ -157,7 +196,7 @@ def load_dataset(input_filepath:str, file_name):
     data_df = pd.read_csv(os.path.join(input_filepath,file_name))
     return data_df
 
-def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_key, format_column_names=True):
+def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_key:int, format_column_names=True):
     '''
     Reads a file, then changes the column names by removing spaces and removing some text that is between "( )"
     Parameters:
@@ -188,11 +227,26 @@ def preprocess_dataset(file_name: str, input_filepath, output_filepath, index_ke
         key = data_df.columns[index_key].to_list()
     else:
         raise TypeError(f'The index_key type should be an integer number of a list of integer numbers. Current type {type(index_key)}')
-        
     data_df = cast_dtype_to_str(data_df, index_key)
     logger.debug(f'Dataset preprocessed from {input_filepath}/{file_name}')
+    
     return data_df
 
+def _transform_column_names(input_filepath, output_filepath):
+    dfs = dict()
+    for param_key, param_value in params.items():# For every table in the parameters
+        file_name = param_value.file_name#get_param(dataset_name,'file_name')
+        keep_columns = param_value.keep_cols.to_list()# get_param(param_key, 'keep_cols')
+        key = param_value.index_key.to_list()#get_param(dataset_name, 'index_key')
+        logger.debug(f'{param_key} before transforming column names')
+        dfs[param_key]=preprocess_dataset(file_name, input_filepath, output_filepath, key).iloc[:, keep_columns]
+    return dfs
+
+def _get_describe_ingredients(orig_ing_df):
+   
+    desc_ingred_df = orig_ing_df.groupby('Ingredients')['Score_unique_EF_'].describe()[['min', 'max']].reset_index()
+    desc_ingred_df.columns=['Ingredients', 'min_EF', 'max_EF']
+    return desc_ingred_df
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
@@ -202,20 +256,31 @@ def main(input_filepath, output_filepath):
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger.info('Preprocessing datasets from raw data')    
+    key_columns = ['Ciqual_AGB', 'Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name' , 'Ingredients']
+    pivot_column = 'Ingredients'
+    value_columns = 'Score_unique_EF_'
 
     # 1. Retrieve all files from /data/raw folder and make basic cleaning and merge
     #files = ['Agribalyse_Synthese.csv', 'Agribalyse_Detail ingredient.csv', 'Agribalyse_Detail etape.csv']
-    dfs = dict()
-    for param_key, param_value in params.items():# For every table in the parameters
-        file_name = param_value.file_name#get_param(dataset_name,'file_name')
-        keep_columns = param_value.keep_cols.to_list()# get_param(param_key, 'keep_cols')
-        key = param_value.index_key.to_list()#get_param(dataset_name, 'index_key')
-        dfs[param_key]=preprocess_dataset(file_name, input_filepath, output_filepath, key).iloc[:, keep_columns]
-     
+    dfs = _transform_column_names(input_filepath, output_filepath)
+    
     #2. pivot ingredients dataframe
-    ing_df = dfs['ingredients']
-    dfs['ingredients'] = pivot_ingredients(ing_df)
-  
+    orig_ing_df = dfs['ingredients']
+    desc_ingred_df = _get_describe_ingredients(orig_ing_df)
+    
+    ing_df = orig_ing_df.merge(desc_ingred_df, how='left', left_on='Ingredients', right_on='Ingredients') 
+    
+    sparse_ing_df = _create_sparse_ingredients(orig_ing_df,key_columns, pivot_column, value_columns)
+    
+    pivot_values = ['min_EF', 'max_EF']
+    pivot_ing_minmax = _create_features_min_max_ing(ing_df, key_columns, pivot_column, pivot_values)
+
+    drop_cols = ['Nom_Francais', 'Groupe_aliment', 'Sous-groupe_aliment', 'LCI_Name']
+    #new_ing_df = pd.concat([sparse_ing_df, pivot_ing_minmax], axis=1, join='inner').drop(columns=drop_cols)
+    new_ing_df = sparse_ing_df.merge(pivot_ing_minmax, how = 'inner', left_on='Ciqual_AGB', right_on="Ciqual_AGB")
+    dfs['ingredients'] = new_ing_df
+   
+    
     #3. merge synthese vs ingredients
     synthese_key = params.synthese.index_key.to_list()#get_param('synthese', 'index_key')
     ingredients_key = params.ingredients.index_key.to_list() #get_param('ingredients', 'index_key')
