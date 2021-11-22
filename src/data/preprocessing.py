@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 from dotenv import find_dotenv, load_dotenv
 import re
+from pandas.core import indexing
 import unidecode
 import numpy as np
 import box
@@ -248,6 +249,12 @@ def _get_describe_ingredients(orig_ing_df):
     desc_ingred_df.columns=['Ingredients', 'min_EF', 'max_EF']
     return desc_ingred_df
 
+def _create_canonical(ingred_df):
+    base_df = ingred_df.iloc[0:1, 13:]#Hard coded. TODO Parameterize
+    for col in base_df.columns[:213]:#TODO 213 ingredients hard coded. The rest are extra features
+        base_df[col].values[:] = 0
+    return base_df
+
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('output_filepath', type=click.Path())
@@ -267,6 +274,8 @@ def main(input_filepath, output_filepath):
     #2. pivot ingredients dataframe
     orig_ing_df = dfs['ingredients']
     desc_ingred_df = _get_describe_ingredients(orig_ing_df)
+
+    desc_ingred_df.to_csv(os.path.join('./../data/interim', 'Agribalyse_MinMax ingredient.csv'))
     
     ing_df = orig_ing_df.merge(desc_ingred_df, how='left', left_on='Ingredients', right_on='Ingredients') 
     
@@ -296,8 +305,12 @@ def main(input_filepath, output_filepath):
     #4. Save the new datasets
     new_ingred_df.to_csv(os.path.join(output_filepath, params.ingredients.file_name), index=False)
     new_etape_df.to_csv(os.path.join(output_filepath, params.etapes.file_name), index=False)
+    #5. Save extra dataframe for the format of the ingredients input 
+    base_df = _create_canonical(new_ingred_df, index=False)
+    base_df.to_csv(os.path.join(output_filepath,'ingredients_data_format.csv'), index=False)
 
-    logger.info(f'End preprocessing. 2 files were created {get_param("ingredients","file_name")},{get_param("etapes","file_name")} in {output_filepath}')
+    logger.info(f'End preprocessing. 3 files were created {params.ingredients.file_name,}\
+            ,{params.etapes.file_name}, ingredients_data_format.csv in {output_filepath}')
 
 if __name__ == '__main__':
     #log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
