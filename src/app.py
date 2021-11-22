@@ -92,7 +92,7 @@ def main():
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Ingrédients choisit ... :", options)
             #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
-            score = st.write("Résultat", predict.predict_score(multiselection))
+            score = st.write("Résultat", predict.predict_score(options))
             st.write(score)
      
     else:

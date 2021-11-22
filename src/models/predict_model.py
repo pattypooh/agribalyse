@@ -7,25 +7,40 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-score_predictor = joblib.load("./../models/score_predictor.joblib")
-desc_ingred = pd.read_csv('./../data/processed/ingredients_data_format.csv')
+MODELS_FILE_PATH = './../models'
+INTERIM_FILE_PATH = './../data/interim'
+INPUT_DATA_FILE_PATH = './../data/processed/'
 
-def rename_pivoted_columns(pivot_ing_minmax: pd.DataFrame)->pd.DataFrame:
-    new_minmax_df = pivot_ing_minmax.copy()
-    new_col_index = [f'{multiindex[0]}_{multiindex[1]}' if multiindex[1]!='' else multiindex[0] for multiindex in pivot_ing_minmax.columns]
-    new_minmax_df.columns=new_col_index
-    new_minmax_df = new_minmax_df.fillna(0)
-    #new_minmax_df = new_minmax_df.drop(columns=drop_cols)
-    return new_minmax_df
+score_predictor = joblib.load(os.path.join(MODELS_FILE_PATH,'score_predictor.joblib'))
+canonical_df = pd.read_csv(os.path.join(INPUT_DATA_FILE_PATH,'ingredients_data_format.csv'))
+statistics_df = pd.read_csv(os.path.join(INTERIM_FILE_PATH,'Agribalyse_MinMax ingredient.csv'))
 
-def add_features(user_ingred_df)->pd.DataFrame:
-    new_ing_df = user_ingred_df.merge(desc_ingred, how = 'inner', left_on='Ciqual_AGB', right_on="Ciqual_AGB")
+
+def get_transposed(statistics_df, metric, prefix:str):
+    metric_df =  statistics_df.set_index('Ingredients')[[metric]].transpose().reset_index(drop=True)
+    new_col_names = [f'{prefix}{c}' for c in metric_df.columns]
+    metric_df.columns = new_col_names
+    return metric_df
+
+def generate_transposed_statistics(df):
+    #transpose minEF
+    minEF_df = get_transposed(df, 'min_EF', prefix='min_EF_')
+    
+    #transpose maxEF
+    maxEF_df = get_transposed(df, 'max_EF', 'max_EF_')
+    
+    #Concatenate minEF and maxEF
+    return pd.concat([minEF_df, maxEF_df], axis=1)
+
+def format_ingredients_list(user_input, canonical_df, statistics_df)->pd.DataFrame:
+    statistics_user_input = generate_transposed_statistics(statistics_df.set_index('Ingredients').loc[user_input,:].reset_index())
+    canonical_df.loc[:,statistics_user_input.columns] = statistics_user_input
+    canonical_df.loc[:,user_input] = 1
 
 
 def predict(ingredients):
-    #ici le model
     #Before predicting, add extra features
-    
+    format_ingredients_list(ingredients, canonical_df, statistics_df)
 
-    score = score_predictor.predict(ingredients)
+    score = score_predictor.predict(canonical_df)
     return score
