@@ -34,13 +34,15 @@ def input_dataframe():
     return base_df
 
 def predict_score(user_ingredients):
-    score = 30
-    #print('ingredients utilisateur', ingredients_user)
-    #df_213_ing = ingredient_to_dataframe(liste_ingredients, ingredients_user)
-    ingredients = user_ingredients
-    if not isinstance(user_ingredients,list) and isiterable(user_ingredients):
-        ingredients = list(user_ingredients)
-        
-    score = predict_model.predict(user_ingredients)
+    '''
+    Calls predict_model.predict with the list of user ingredients
+    '''
+    score = 0
+
+    if len(user_ingredients) == 0:
+        score = 'Please define the ingredients' 
+    else:
+        clean_ingredients = list(set(user_ingredients)) #removing duplicates
+        score = predict_model.predict(clean_ingredients)
     return score
 
