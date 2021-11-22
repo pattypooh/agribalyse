@@ -244,7 +244,6 @@ def _transform_column_names(input_filepath, output_filepath):
     return dfs
 
 def _get_describe_ingredients(orig_ing_df):
-   
     desc_ingred_df = orig_ing_df.groupby('Ingredients')['Score_unique_EF_'].describe()[['min', 'max']].reset_index()
     desc_ingred_df.columns=['Ingredients', 'min_EF', 'max_EF']
     return desc_ingred_df
