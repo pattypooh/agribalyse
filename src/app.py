@@ -16,29 +16,32 @@ ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascendin
  
 
 def main():    
-    menu = ['A propos','A vos calculs', 'A propos de nous']
+    menu = ['À propos','À vos calculs', 'À propos de nous']
     #choice = st.sidebar.selectbox("Menu", menu)
+    st.sidebar.image("agribalyse_logo.png", use_column_width=True)
     choice = st.sidebar.radio('Select a page:',menu)
-    if choice == 'A propos':
-        
-        st.write("Depuis 2013, AGRIBALYSE® est un programme collectif et innovant qui met à disposition des données de référence sur les impacts environnementaux des produits agricoles et alimentaires à travers une base de données construite selon la méthodologie des Analyses du Cycle de Vie (ACV).")
-        st.write("La méthode de l’Analyse du Cycle de Vie est une méthode reconnue et utilisée à l’échelle internationale par la communauté scientifique, les acteurs privés et les pouvoirs politiques.")
-        st.write("L'ACV est une méthode de quantification des impacts d’un produit sur l’environnement tout au long de son cycle de vie (ex : agriculture, transport, emballage etc.). En plus d'être une méthode prenant en compte toutes les étapes du cycle de vie d'un produit, cette méthode prend en compte plusieurs grands enjeux environnementaux (changement climatique, qualité de l’eau, qualité de l’air, impact sur les sols…) et pas seulement le climat.")
-        
-        url = 'https://agribalyse.ademe.fr/'
-        st.markdown(url, unsafe_allow_html=True)
-        
-        
-        st.subheader("Découvrez l’impact environnemental de l'alimentation selon les indicateurs ACV")
-        st.write('Agribalyse met à disposition une base de données environnementale de référence sur des produits agricoles et alimentaires')
-        st.write("2500 produits, 16 indicateurs construits selon l’approche scientifique de l’Analyse de Cycle de Vie")
-        st.write("Un programme collaboratif associant des scientifiques et experts des secteurs agricoles, agroalimentaires et de l’environnement")
-        st.write("Un outil au service des professionnels agricoles et alimentaires, et des consommateurs") 
-        st.write("**Découvrer le jeu de données **")
+    if choice == 'À propos':
+        st.subheader("Le cheminement de notre projet")
+        st.write("Suite à différentes discussions de projets pouvant être intéressants et parlant à un large public, notre attention s'est portée sur un aspect méconnu des recettes de cuisine.")
+        st.write("En effet l'aspect environnemental de chaque recette est souvent ignoré ou laissé de côté, en nous appuyant sur la base agribalayse nous avons trouvé un terrain d'étude qui nous semblait pertinent.")
+        st.write("Notre première approche s'est tout d'abord déroulée par une exploration approfondie de la base _**Agribalyse**_.")
+        st.write("")
+        st.write("En effet cette base est constituée de : ")
+        st.write("- x variables explicatives")
+        st.write("- y variables numériques")
+
+        st.subheader("Concernant l'approche utilisée et le processus employé")
+        st.write("Nous avons opté pour un pre-processing usuel de notre donnée enlevant les variables qui n'étaient pas pertinentes à notre sens.")
+        st.write("")
+        st.write("Par la suite nous avons effectué une réduction de dimension avant de procéder à une sélection de nos features")
+        st.write("")
+        #Utilisation de quels modèles et quels sont nos résultats au global? 
+        #doit-on évoquer l'aspect overfitting géré ou garde-t-on cela pour la présentation? 
+
         if st.checkbox('Afficher les données'):
             st.write(dataset)
         
-    elif choice == 'A vos calculs':
+    elif choice == 'À vos calculs':
         st.write("**Quels sont les aliments avec la plus grosse empreinte carbone ? 😒 😒**")
         st.write("🍖 🥩 🍔 La **viande** rouge ? ")
         st.write("🍳 🍼 🥛 Les **protéines** animales ?")
@@ -47,7 +50,7 @@ def main():
         st.write("🛩️ ⛴️  ✈️**Le bio a-t-il une meilleure empreinte carbone que le non bio** ? ")
         st.write("")
 
-        st.subheader("Quel sera le Score environnemental PEF de votre plat ?")
+        st.subheader("Quel sera le score environnemental PEF de votre plat ?")
         
 
         data = dataset[["Nom Français","Ingredients","Score unique EF (mPt/kg de produit)"]]
@@ -100,11 +103,13 @@ def main():
             st.write(score)
      
     else:
-        st.subheader('A propos de nous')#
+        st.subheader('À propos de nous')#
+        st.write("Ce projet fait partie intégrante de la formation Fullstack au sein du bootcamp Jedha")
+        st.write("Notre équipe [Aura](https://github.com/aimorenov),\n[Patricia](https://github.com/pattypooh),\n[Malika](https://github.com/mbe-repo),\n[Anatole](https://github.com/anatolereffet)")
     
 
 if __name__ == '__main__':
-    main()    
+    main() 
 
 #options = pd.DataFrame(options, columns="Ingredients")
             #if options["Ingredients"] == ingredient_to_dataframe['Ingredients']:
