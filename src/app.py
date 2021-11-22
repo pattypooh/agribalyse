@@ -8,19 +8,15 @@ from predict import ingredient_to_dataframe
 import os
 import predict
 
-#header_container = st.container()
 
 
-#dataset = pd.read_csv("Agribalyse_Detail ingredient.csv")
 print(os.curdir)
 dataset = pd.read_csv('./../data/raw/Agribalyse_Detail ingredient.csv')
 ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascending=True)
-#product_list = 
-#with header_container:
-#    st.title("Agribalyse")   
+ 
 
 def main():    
-    menu = ['A propos de nous','Home', 'About us']
+    menu = ['A propos','A vos calculs', 'A propos de nous']
     #choice = st.sidebar.selectbox("Menu", menu)
     choice = st.sidebar.radio('Select a page:',menu)
     if choice == 'A propos':
@@ -42,18 +38,18 @@ def main():
         if st.checkbox('Afficher les données'):
             st.write(dataset)
         
-    elif choice == 'Home':
+    elif choice == 'A vos calculs':
         st.write("**Quels sont les aliments avec la plus grosse empreinte carbone ? 😒 😒**")
-        st.write("🍖 La **viande rouge** 🥩 🍔 ? ")
-        st.write("🍳 Les **protéines animales** 🍼 🥛?")
-        st.write("🥭 Les produits **hors saison** 🥑 🍆? ")
-        st.write("🛩️ Le bio a-t-il une meilleure empreinte carbone que le non bio ⛴️  ✈️? ")
+        st.write("🍖 🥩 🍔 La **viande** rouge ? ")
+        st.write("🍳 🍼 🥛 Les **protéines** animales ?")
+        st.write("🥭 🥑 🍆 Les produits **hors saison** ? ")
+        st.write("")
+        st.write("🛩️ ⛴️  ✈️**Le bio a-t-il une meilleure empreinte carbone que le non bio** ? ")
         st.write("")
 
-        st.subheader("L'impact de votre assiette sur le changement climatique (kg CO2 eq/kg de produit)")
-        st.write("**14 indicateurs permettent de mesurer l'impact de notre consommation sur l'empreinte carbonne.**")
-        st.write("Quelle sera ton impact .....")
-        ###Corriger. Il faut selectionner le score total (de la table synthese) 
+        st.subheader("Quel sera le Score environnemental PEF de votre plat ?")
+        
+
         data = dataset[["Nom Français","Ingredients","Score unique EF (mPt/kg de produit)"]]
         selection = data['Nom Français'].drop_duplicates()  
         
@@ -63,26 +59,34 @@ def main():
             func = st.sidebar.selectbox if sidebar else st.selectbox
             return func(text, np.insert(np.array(values, object), 0, default))
 
-        make_selection = selectbox_with_default('Commence par choisir ton plat ...', selection)
-        if make_selection == DEFAULT:
-            st.warning("**- ⬆ Sélectionne un plat ⬆ -**")
+        make_selection = selectbox_with_default('------', selection)
+        #if make_selection == DEFAULT:
+            #st.warning("**- ⬆ Sélectionnez votre plat ⬆ -**")
             #raise StopException
         
-        st.write("**Les ingrédients et l'impact environnement de votre plat : **")
-        ingredient = data[data['Nom Français'].isin([make_selection])]
-        st.write("le score de ton plat est de : ")
-        total = round(ingredient["Score unique EF (mPt/kg de produit)"].sum(),2)
-        st.write("La liste des ingrédients : ")
-        ingredient = ingredient[['Ingredients', 'Score unique EF (mPt/kg de produit)']]
-        st.write({f"le score de ton plat est de {total} mPt par kg de produit"})
-        st.write(ingredient)
-        st.subheader('') 
-        #st.write("**Pourcentage des ingrédients dans le score environnemental**")
-        fig = px.pie(ingredient, values='Score unique EF (mPt/kg de produit)', names='Ingredients')
-        st.plotly_chart(fig)
+        button_sent = st.button("👌  Voir le score environnemental")
+        if button_sent:
+            st.success("**Le score de votre plat est de : **")
+            #st.write("**Les ingrédients et l'impact environnement de votre plat : **")
+            ingredient = data[data['Nom Français'].isin([make_selection])]
+            #st.write("le score de ton plat est de : ")
+            total = round(ingredient["Score unique EF (mPt/kg de produit)"].sum(),2)
+            ingredient = ingredient[['Ingredients', 'Score unique EF (mPt/kg de produit)']]
+            st.write({f"{total} mPt par kg de produit"})
+            st.write("**par ingrédients : **")
+            st.write(ingredient)
+            st.subheader('') 
+            #st.write("**Pourcentage des ingrédients dans le score environnemental**")
+            fig = px.pie(ingredient, values='Score unique EF (mPt/kg de produit)', names='Ingredients')
+            st.plotly_chart(fig)
+        
+        st.write("")
+        st.write("")
+        st.write("")
+
+        st.subheader("Choisissez vos ingrédients pour évaluer l'impact sur l'environnement")
         
 
-        st.write("**Choisit tes ingrédients et calculons le score : **")
         multiselection = ingredients_list
           # supression de l'ingredient Autres étapes
         multiselection = multiselection.drop([4])
@@ -90,13 +94,13 @@ def main():
         button_sent = st.button("Valider les ingrédients")
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
-            st.write("Ingrédients choisit ... :", options)
+            st.write("Vos Ingrédients ... :", options)
             #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
             score = st.write("Résultat", predict.predict_score(options))
             st.write(score)
      
     else:
-        st.subheader('About')#
+        st.subheader('A propos de nous')#
     
 
 if __name__ == '__main__':
