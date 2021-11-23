@@ -42,14 +42,19 @@ def main():
             st.write(dataset)
         
     elif choice == 'À vos calculs':
-        st.write("**Quels sont les aliments avec la plus grosse empreinte carbone ? 😒 😒**")
-        st.write("🍖 🥩 🍔 La **viande** rouge ? ")
-        st.write("🍳 🍼 🥛 Les **protéines** animales ?")
-        st.write("🥭 🥑 🍆 Les produits **hors saison** ? ")
+        st.subheader("**Les ingrédients les plus polluants selon l'indice environnemental PEF** ")
+        st.markdown("*_Product Environmental Footprint_")
         st.write("")
         st.write("")
-
-        st.subheader("Quel sera le score environnemental PEF de votre plat ?")
+        st.markdown("🍟 🌮 🥓 " "🍳 🍼 🥛" "🥭 🥑 🍆")
+        score_ingredient = dataset.groupby("Ingredients")["Score unique EF (mPt/kg de produit)"].mean().reset_index()
+        #score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Empreinte écologique'})
+        score_ingredient = score_ingredient.sort_values('Score unique EF (mPt/kg de produit)', ascending=False)
+        score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Score EF par kg de produit'}, inplace=True)
+        st.dataframe(score_ingredient)
+        
+        st.write("")
+        st.write("")
         
         st.subheader("**🎯🎯 A vous de jouer 🎯🎯**")
         st.write("")
