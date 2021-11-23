@@ -4,8 +4,13 @@ import numpy as np
 from src.models import predict_model
 
 df = pd.read_csv("liste_ingredient.csv")
+df_score = pd.read_csv('./../data/raw/Agribalyse_Detail ingredient.csv')
 
 liste_ingredients = df.columns.tolist()
+
+score_ingredient = df_score.groupby("Ingredients")["Score unique EF (mPt/kg de produit)"].mean().reset_index()
+score_ingredient = score_ingredient.sort_values('Score unique EF (mPt/kg de produit)', ascending=False).head(7)
+
 
 def isiterable(obj):
     '''

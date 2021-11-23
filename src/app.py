@@ -39,16 +39,29 @@ def main():
             st.write(dataset)
         
     elif choice == 'A vos calculs':
-        st.write("**Quels sont les aliments avec la plus grosse empreinte carbone ? 😒 😒**")
-        st.write("🍖 🥩 🍔 La **viande** rouge ? ")
-        st.write("🍳 🍼 🥛 Les **protéines** animales ?")
-        st.write("🥭 🥑 🍆 Les produits **hors saison** ? ")
+        st.subheader("**Les ingrédients les plus polluants selon l'indice environnemental PEF** ")
+        st.markdown("*_Product Environmental Footprint_")
+        #st.write("🍖 🥩 🍔 La **viande** rouge ? ")
+        #st.write("🍳 🍼 🥛 Les **protéines** animales ?")
+        #st.write("🥭 🥑 🍆 Les produits **hors saison** ? ")
         st.write("")
-        st.write("🛩️ ⛴️  ✈️**Le bio a-t-il une meilleure empreinte carbone que le non bio** ? ")
         st.write("")
-
-        st.subheader("Quel sera le Score environnemental PEF de votre plat ?")
+        st.markdown("🍟 🌮 🥓 " "🍳 🍼 🥛" "🥭 🥑 🍆")
+        score_ingredient = dataset.groupby("Ingredients")["Score unique EF (mPt/kg de produit)"].mean().reset_index()
+        #score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Empreinte écologique'})
+        score_ingredient = score_ingredient.sort_values('Score unique EF (mPt/kg de produit)', ascending=False)
+        score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Score EF par kg de produit'}, inplace=True)
+        st.dataframe(score_ingredient)
         
+        st.write("")
+        st.write("")
+        
+        st.subheader("**🎯🎯 A vous de jouer 🎯🎯**")
+        st.write("")
+        st.markdown("Vous pouvez choisir de calculer l'impact d'un plat ou de sélectionner des ingrédients.")
+        st.subheader("🎯 Quel sera le Score environnemental PEF de votre plat ?")
+        st.write("")
+        st.write("")
 
         data = dataset[["Nom Français","Ingredients","Score unique EF (mPt/kg de produit)"]]
         selection = data['Nom Français'].drop_duplicates()  
@@ -59,11 +72,11 @@ def main():
             func = st.sidebar.selectbox if sidebar else st.selectbox
             return func(text, np.insert(np.array(values, object), 0, default))
 
-        make_selection = selectbox_with_default('------', selection)
+        make_selection = selectbox_with_default('------ Choisissez un plat', selection)
         #if make_selection == DEFAULT:
             #st.warning("**- ⬆ Sélectionnez votre plat ⬆ -**")
             #raise StopException
-        
+        st.write("")
         button_sent = st.button("👌  Voir le score environnemental")
         if button_sent:
             st.success("**Le score de votre plat est de : **")
@@ -73,7 +86,7 @@ def main():
             total = round(ingredient["Score unique EF (mPt/kg de produit)"].sum(),2)
             ingredient = ingredient[['Ingredients', 'Score unique EF (mPt/kg de produit)']]
             st.write({f"{total} mPt par kg de produit"})
-            st.write("**par ingrédients : **")
+            st.write("*les ingrédients de votre plat : *")
             st.write(ingredient)
             st.subheader('') 
             #st.write("**Pourcentage des ingrédients dans le score environnemental**")
@@ -84,14 +97,15 @@ def main():
         st.write("")
         st.write("")
 
-        st.subheader("Choisissez vos ingrédients pour évaluer l'impact sur l'environnement")
+        st.subheader("🎯 Choisissez vos ingrédients pour évaluer l'impact sur l'environnement")
         
 
         multiselection = ingredients_list
           # supression de l'ingredient Autres étapes
         multiselection = multiselection.drop([4])
-        options = st.multiselect('------', multiselection)
-        button_sent = st.button("Valider les ingrédients")
+        options = st.multiselect('------ Choisisez des ingrédients', multiselection)
+        st.write("")
+        button_sent = st.button("👌  Valider les ingrédients")
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Vos Ingrédients ... :", options)
@@ -100,12 +114,21 @@ def main():
             st.write(score)
      
     else:
-        st.subheader('A propos de nous')#
+        st.header('Promo dsmpt-paris-06')
+        st.write()
+        st.write()
+
+        st.write("Aura MORENOVEGA")
+        st.write("Malika BERREHAIL")
+        st.write("Patricia ESCALERA")
+        st.write("Anatole REFLET")
+        
+        st.markdown("Retrouvez notre code dur github :")
+        url2 = 'https://github.com/pattypooh/agribalyse'
+        st.markdown(url2, unsafe_allow_html=True)
+        
+        
     
 
 if __name__ == '__main__':
     main()    
-
-#options = pd.DataFrame(options, columns="Ingredients")
-            #if options["Ingredients"] == ingredient_to_dataframe['Ingredients']:
-                #ingredient_to_dataframe["Presence"] = 1
