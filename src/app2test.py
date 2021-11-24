@@ -10,6 +10,14 @@ import predict
 #Global variables
 file_name = './../data/raw/Agribalyse_Detail ingredient.csv'
 
+# hide Made with Streamlit
+hide_streamlit_style = """
+            <style>
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)             
+
 dataset = pd.read_csv(file_name)
 ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascending=True)
 
@@ -76,7 +84,7 @@ def main():
                         _source: Agribalyse-Guide-VF_Planche.pdf_')
 
         st.subheader("Le projet")
-        st.write("L'idée de permettre de connaître l'impact environnementale des nos plats de tous les jours nous a attiré fortement.")
+        st.write("L'idée de connaître l'impact environnementale des nos plats quotidiens nous à fortement attiré.")
 
         st.write('Selon la documentation, les données fournies dans la version simplifiée d’Agribalyse® – Partie Alimentation – représentent les indicateurs calculés \
                 pour des produits « standards », les plus consommés en France. On trouvera ainsi par exemple l’impact d’une **pizza Margherita \
@@ -106,11 +114,8 @@ def main():
         st.write("")
         st.markdown("🍟 🌮 🥓 " "🍳 🍼 🥛" "🥭 🥑 🍆")
         score_ingredient = get_table_polluants()
-        #score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Empreinte écologique'})
-        #score_ingredient = score_ingredient.sort_values('Score unique EF (mPt/kg de produit)', ascending=False)
-        #score_ingredient.rename(columns = {'Score unique EF (mPt/kg de produit)':'Score EF par kg de produit'}, inplace=True)
-        st.text("Le « Eco-indicateur Point » (Pt): 1 Pt est représentatif de l’impact environnemental annuel de 1000 habitants européens.  \n \
-        (1 habitant pour 1 mPt)")
+        st.markdown("L' « Eco-indicateur Point » (Pt) est un indice pondérant les 16 indicateurs, et ainsi permettre de quantifier l'impact des aliments sur la dégration environnementale.")
+        st.text( "1 Pt est représentatif de l’impact environnemental annuel de 1000 habitants européens. (1 habitant pour 1 mPt)")
         
         st.dataframe(score_ingredient, width=700)
 
