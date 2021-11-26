@@ -114,8 +114,8 @@ def main():
         st.write("")
         st.markdown("🍟 🌮 🥓 " "🍳 🍼 🥛" "🥭 🥑 🍆")
         score_ingredient = get_table_polluants()
-        st.markdown("L' « Eco-indicateur Point » (Pt) est un indice pondérant les 16 indicateurs, et ainsi permettre de quantifier l'impact des aliments sur la dégration environnementale.")
-        st.text( "1 Pt est représentatif de l’impact environnemental annuel de 1000 habitants européens. (1 habitant pour 1 mPt)")
+        st.markdown("L' « Eco-indicateur Point » (Pt) est un indice pondérant les 16 indicateurs, et ainsi permettre de quantifier l'impact des aliments sur la dégradation environnementale.")
+        st.text("1 Pt est représentatif de l’impact environnemental annuel de 1000 habitants européens. (1 habitant pour 1 mPt)")
         
         st.dataframe(score_ingredient, width=700)
 
