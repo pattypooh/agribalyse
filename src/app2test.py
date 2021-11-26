@@ -16,7 +16,10 @@ hide_streamlit_style = """
             footer {visibility: hidden;}
             </style>
             """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)             
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+#title
+st.header("L'empreinte environnementale de ton assiette")            
 
 dataset = pd.read_csv(file_name)
 ingredients_list = dataset['Ingredients'].drop_duplicates().sort_values(ascending=True)
