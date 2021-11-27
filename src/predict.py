@@ -8,7 +8,7 @@ import os
 curren_dir = os.getcwd()
 
 
-df = pd.read_csv(os.path.join(curren_dir,"liste_ingredient.csv"))
+df = pd.read_csv(os.path.join(curren_dir,"src/liste_ingredient.csv"))
 df_score = pd.read_csv(os.path.join(curren_dir,'data/raw/Agribalyse_Detail ingredient.csv'))
 
 liste_ingredients = df.columns.tolist()
