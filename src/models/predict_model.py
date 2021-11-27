@@ -7,9 +7,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-MODELS_FILE_PATH = './../models'
-INTERIM_FILE_PATH = './../data/interim'
-INPUT_DATA_FILE_PATH = './../data/processed/'
+#MODELS_FILE_PATH = './../models'
+#INTERIM_FILE_PATH = './../data/interim'
+#INPUT_DATA_FILE_PATH = './../data/processed/'
 
 #Modifications in directory paths necessary for deployment of app in Heroku
 curren_dir = os.getcwd()
@@ -17,8 +17,8 @@ curren_dir = os.getcwd()
 
 
 score_predictor = joblib.load(os.path.join(curren_dir,'src/models/score_predictor.joblib'))
-canonical_df = pd.read_csv(os.path.join(INPUT_DATA_FILE_PATH,'ingredients_data_format.csv'))
-statistics_df = pd.read_csv(os.path.join(INTERIM_FILE_PATH,'Agribalyse_MinMax ingredient.csv'))
+canonical_df = pd.read_csv(os.path.join(curren_dir,'data/interim/ingredients_data_format.csv'))
+statistics_df = pd.read_csv(os.path.join(curren_dir,'data/processed/Agribalyse_MinMax ingredient.csv'))
 
 
 def get_transposed(statistics_df, metric, prefix:str):
