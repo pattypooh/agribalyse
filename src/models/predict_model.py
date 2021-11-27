@@ -11,7 +11,10 @@ MODELS_FILE_PATH = './../models'
 INTERIM_FILE_PATH = './../data/interim'
 INPUT_DATA_FILE_PATH = './../data/processed/'
 
-score_predictor = joblib.load('score_predictor.joblib')
+#Current directory. Necessary for deployment of app in Heroku
+curren_dir = os.getcwd()
+
+score_predictor = joblib.load(os.path.join(curren_dir,'score_predictor.joblib'))
 canonical_df = pd.read_csv(os.path.join(INPUT_DATA_FILE_PATH,'ingredients_data_format.csv'))
 statistics_df = pd.read_csv(os.path.join(INTERIM_FILE_PATH,'Agribalyse_MinMax ingredient.csv'))
 
