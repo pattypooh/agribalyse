@@ -14,6 +14,11 @@ curren_dir = os.getcwd()
 #Global variables
 file_name = os.path.join(curren_dir,'data/raw/Agribalyse_Detail ingredient.csv')
 
+#Set page title and icon
+st.set_page_config(page_title='Envfoodprint', page_icon = "🌳", layout = 'wide', initial_sidebar_state = 'auto')
+
+
+
 # hide Made with Streamlit
 hide_streamlit_style = """
             <style>
@@ -177,7 +182,8 @@ def main():
             st.write("🍎 🥦🍇   🦑🍖🥩")
             st.write("Vos Ingrédients ... :", options)
             #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
-            st.write("Résultat. Votre plat pollue autant que {:0.2f} personnes européennes en une seule année!🌍 👨 👩 🌳".format(predict.predict_score(options)))
+            score_to_print = predict.predict_score(options)[0]
+            st.write("Résultat. Votre plat pollue autant que {:0.2f} personnes européennes en une seule année!🌍 👨 👩 🌳".format(score_to_print))
             #st.write(score)
         
     else:
