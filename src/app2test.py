@@ -78,7 +78,7 @@ def _set_block_container_style(max_width_100_percent: bool = False, padding_top:
 def main():
     _set_block_container_style()
     menu = ['À propos','À vos calculs', 'À propos de nous']
-    st.sidebar.image("agribalyse_logo.png", use_column_width=True)
+    st.sidebar.image(os.path.join(curren_dir,"src/agribalyse_logo.png"), use_column_width=True)
     choice = st.sidebar.radio('Select a page:',menu)
     if choice == 'À propos':
         st.subheader("Le programme AGRIBALYSE")
@@ -101,7 +101,7 @@ def main():
                 utilisés pour les produits transformés (c’est-a dire 18 % des tomates issues de la production \
                     française, 46 % de tomates italiennes et 36 % de tomates espagnoles') 
 
-        st.image('pizza.PNG')
+        st.image(os.path.join(curren_dir,'src/pizza.PNG'))
 
         st.write("Cette base est constituée de : ")
         st.write("- 200 productions agricoles")
@@ -170,14 +170,14 @@ def main():
         
         # supression de l'ingredient Autres étapes
         #multiselection = multiselection.drop([4])
-        options = st.multiselect('------ Choisisez des ingrédients', multiselection)
+        options = st.multiselect('------ Choisissez des ingrédients', multiselection)
         st.write("")
         button_sent = st.button("👌  Valider les ingrédients")
         if button_sent:
             st.write("🥬🥦🍇   🦑🍖🥩")
             st.write("Vos Ingrédients ... :", options)
             #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
-            score = st.write("Résultat", predict.predict_score(options))
+            score = st.write("Résultat. Votre plat pollue autant que {} personnes européennes en une seule année!".format(predict.predict_score(options)))
             st.write(score)
         
     else:
