@@ -17,8 +17,8 @@ curren_dir = os.getcwd()
 
 
 score_predictor = joblib.load(os.path.join(curren_dir,'src/models/score_predictor.joblib'))
-canonical_df = pd.read_csv(os.path.join(curren_dir,'data/interim/ingredients_data_format.csv'))
-statistics_df = pd.read_csv(os.path.join(curren_dir,'data/processed/Agribalyse_MinMax ingredient.csv'))
+canonical_df = pd.read_csv(os.path.join(curren_dir,'data/processed/ingredients_data_format.csv'))
+statistics_df = pd.read_csv(os.path.join(curren_dir,'data/interim/Agribalyse_MinMax ingredient.csv'))
 
 
 def get_transposed(statistics_df, metric, prefix:str):
