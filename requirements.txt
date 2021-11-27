@@ -26,3 +26,4 @@ unidecode
 mlflow
 pyyaml
 streamlit
+gunicorn
