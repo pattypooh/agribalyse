@@ -174,11 +174,11 @@ def main():
         st.write("")
         button_sent = st.button("👌  Valider les ingrédients")
         if button_sent:
-            st.write("🥬🥦🍇   🦑🍖🥩")
+            st.write("🍎 🥦🍇   🦑🍖🥩")
             st.write("Vos Ingrédients ... :", options)
             #st.write("Résultat", ingredient_to_dataframe(multiselection,options))
-            score = st.write("Résultat. Votre plat pollue autant que {} personnes européennes en une seule année!".format(predict.predict_score(options)))
-            st.write(score)
+            st.write("Résultat. Votre plat pollue autant que {:0.2f} personnes européennes en une seule année!🌍 👨 👩 🌳".format(predict.predict_score(options)))
+            #st.write(score)
         
     else:
         st.subheader('À propos de nous')#
