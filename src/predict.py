@@ -2,9 +2,14 @@
 import pandas as pd
 import numpy as np
 from src.models import predict_model
+import os
 
-df = pd.read_csv("liste_ingredient.csv")
-df_score = pd.read_csv('./../data/raw/Agribalyse_Detail ingredient.csv')
+#Modifications in directory paths necessary for deployment of app in Heroku
+curren_dir = os.getcwd()
+
+
+df = pd.read_csv(os.path.join(curren_dir,"liste_ingredient.csv"))
+df_score = pd.read_csv(os.path.join(curren_dir,'data/raw/Agribalyse_Detail ingredient.csv'))
 
 liste_ingredients = df.columns.tolist()
 
