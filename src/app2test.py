@@ -7,8 +7,12 @@ import numpy as np
 import os
 import predict
 
+#Modifications in directory paths necessary for deployment of app in Heroku
+curren_dir = os.getcwd()
+
+
 #Global variables
-file_name = './../data/raw/Agribalyse_Detail ingredient.csv'
+file_name = os.path.join(curren_dir,'data/raw/Agribalyse_Detail ingredient.csv')
 
 # hide Made with Streamlit
 hide_streamlit_style = """
